@@ -1523,7 +1523,7 @@ def test_LogisticRegressionCV_GridSearchCV_elastic_net_ovr():
 
 
 @pytest.mark.parametrize('multi_class', ('ovr', 'multinomial'))
-def test_LogisticRegressionCV_no_refit(multi_class):
+def test_LogisticRegressionCV_no_refit_elasticnet(multi_class):
     # Test LogisticRegressionCV attribute shapes when refit is False
 
     n_classes = 3
@@ -1541,6 +1541,27 @@ def test_LogisticRegressionCV_no_refit(multi_class):
     lrcv.fit(X, y)
     assert lrcv.C_.shape == (n_classes,)
     assert lrcv.l1_ratio_.shape == (n_classes,)
+    assert lrcv.coef_.shape == (n_classes, n_features)
+
+
+@pytest.mark.parametrize('penalty', ('l1', 'l2'))
+@pytest.mark.parametrize('multi_class', ('ovr', 'multinomial'))
+def test_LogisticRegressionCV_no_refit_l1l2(multi_class, penalty):
+    # Test LogisticRegressionCV attribute shapes when refit is False
+
+    n_classes = 3
+    n_features = 20
+    X, y = make_classification(n_samples=200, n_classes=n_classes,
+                               n_informative=n_classes, n_features=n_features,
+                               random_state=0)
+
+    Cs = np.logspace(-4, 4, 3)
+
+    lrcv = LogisticRegressionCV(penalty=penalty, Cs=Cs, solver='saga',
+                                random_state=0,
+                                multi_class=multi_class, refit=False)
+    lrcv.fit(X, y)
+    assert lrcv.C_.shape == (n_classes,)
     assert lrcv.coef_.shape == (n_classes, n_features)
 
 
